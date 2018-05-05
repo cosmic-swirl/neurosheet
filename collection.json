@@ -1,0 +1,34 @@
+{
+  "store": [
+    {
+      "identity": "ns-bbmvap9hb52cuucmvolg",
+      "creationTime": "2018-05-05T11:18:13.248728089-07:00",
+      "lastModifiedTime": "2018-05-05T11:18:13.248728089-07:00",
+      "lastModifiedEventID": "ne-0",
+      "fileLocation": "./test.txt",
+      "checksum": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "identity": "ns-bbmvdq1hb52ct4qc4bdg",
+      "creationTime": "2018-05-05T11:24:40.344058487-07:00",
+      "lastModifiedTime": "2018-05-05T11:24:40.344058487-07:00",
+      "lastModifiedEventID": "ne-0",
+      "fileLocation": "./test.txt",
+      "checksum": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "connections": [
+    {
+      "identity": "nc-bbmvp7hhb52crqj9r8e0",
+      "creationTime": "2018-05-05T11:49:02.381253438-07:00",
+      "lastModifiedTime": "2018-05-05T11:49:02.381253438-07:00",
+      "lastModifiedEventID": "ne-0",
+      "strength": 0.5,
+      "items": [
+        "ns-bbmvdq1hb52ct4qc4bdg",
+        "ns-bbmvap9hb52cuucmvolg"
+      ]
+    }
+  ],
+  "eventLog": []
+}

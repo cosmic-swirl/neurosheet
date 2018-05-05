@@ -1,0 +1,180 @@
+package main
+
+import (
+	"fmt"
+	"encoding/json"
+	"io/ioutil"
+	"os"
+	"time"
+	"github.com/rs/xid"
+	"crypto/sha256"
+	"math"
+	"io"
+)
+
+
+type State struct {
+	Store []StoreItem `json:"store"`
+	Connections []ConnectionItem `json:"connections"`
+	EventLog []EventLogItem `json:"eventLog"`
+}
+
+type StoreItem struct {
+	Identity string `json:"identity"`
+	CreationTime time.Time `json:"creationTime"`
+	LastModifiedTime time.Time `json:"lastModifiedTime"`
+	LastModifiedEventID string `json:"lastModifiedEventID"`
+	FileLocation string `json:"fileLocation"`
+	Checksum string `json:"checksum"`
+}
+
+type ConnectionItem struct {
+	Identity string `json:"identity"`
+	CreationTime time.Time `json:"creationTime"`
+	LastModifiedTime time.Time `json:"lastModifiedTime"`
+	LastModifiedEventID string `json:"lastModifiedEventID"`
+	Strength float32 `json:"strength"`
+	Items []string `json:"items"`
+}
+
+type EventLogItem struct {
+	Identity string `json:"identity"`
+	Time int `json:"time"`
+	ModificationType string `json:"modificationType"`
+	Change []Change `json:"change"`
+}
+
+type Change struct {
+	Field string
+	Value string
+}
+
+type IdentityType int
+
+const (
+	Store IdentityType = 0
+	Connection IdentityType = 1
+	Event IdentityType = 2
+)
+
+var state State
+
+func encodeStateToJson() []byte {
+    bytes, err := json.MarshalIndent(state, "", "  ")
+    if err != nil {
+        fmt.Println(err.Error())
+        os.Exit(1)
+    }
+
+    return bytes
+}
+
+func loadCollectionFromJson() {
+	raw, err := ioutil.ReadFile("./collection.json")
+	if err != nil {
+		fmt.Println("error reading state from json", err.Error())
+		os.Exit(1)
+	}
+
+	json.Unmarshal(raw, &state)
+}
+
+func writeStateToJson(bytes []byte) {
+	err := ioutil.WriteFile("./collection.json", bytes, 0777)
+	if err != nil {
+		fmt.Println("error writing state to json", err.Error())
+		os.Exit(1)
+	}
+}
+
+func printState () {
+	fmt.Println(string(encodeStateToJson()))
+}
+
+func addStoreItem(fileLocation string) {
+	file, openErr := os.Open(fileLocation)
+	if openErr != nil {
+		fmt.Println("could not open file")
+		return
+	}
+
+	defer file.Close()
+
+	const filechunk = 8192
+
+	info, _ := file.Stat()
+	filesize := info.Size()
+	blocks := uint64(math.Ceil(float64(filesize) / float64(filechunk)))
+	hash := sha256.New()
+
+	for i := uint64(0); i < blocks; i++ {
+		blocksize := int(math.Min(filechunk, float64(filesize-int64(i*filechunk))))
+		buf := make([]byte, blocksize)
+
+		file.Read(buf)
+		io.WriteString(hash, string(buf))
+	}
+
+	identity := "ns-"+xid.New().String()
+	creationTime := time.Now()
+	lastModifiedTime := creationTime
+	lastModifiedEventID := "ne-0"
+	checksum := fmt.Sprintf("%x", hash.Sum(nil))
+
+	item := StoreItem{
+		Identity: identity,
+		CreationTime: creationTime,
+		LastModifiedTime: lastModifiedTime,
+		LastModifiedEventID: lastModifiedEventID,
+		FileLocation: fileLocation,
+		Checksum: checksum,
+	}
+	state.Store = append(state.Store, item)
+}
+
+func searchStoreForItem(searchItem string) bool {
+	for _, v := range state.Store {
+		if v.Identity == searchItem {
+			return true
+		}
+	}
+	return false
+}
+
+func addConnectionItem(item1 string, item2 string, input_strength float32) {
+	if !(1 > input_strength && input_strength > 0) {
+		return
+	}
+
+	if !( searchStoreForItem(item1) && searchStoreForItem(item2) ) {
+		fmt.Println("could not find both items in store for connection")
+		return
+	}
+
+	identity := "nc-"+xid.New().String()
+	creationTime := time.Now()
+	lastModifiedTime := creationTime
+	lastModifiedEventID := "ne-0"
+	strength := input_strength
+	items := []string{item1, item2}
+
+	item := ConnectionItem{
+		Identity: identity,
+		CreationTime: creationTime,
+		LastModifiedTime: lastModifiedTime,
+		LastModifiedEventID: lastModifiedEventID,
+		Strength: strength,
+		Items: items,
+	}
+	state.Connections = append(state.Connections, item)
+}
+
+func main() {
+
+	loadCollectionFromJson()
+	// addStoreItem("./test.txt")
+	addConnectionItem("ns-bbmvdq1hb52ct4qc4bdg", "ns-bbmvap9hb52cuucmvolg", 0.5)
+	printState()
+	writeStateToJson(encodeStateToJson())
+
+}
