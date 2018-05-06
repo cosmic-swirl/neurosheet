@@ -24,7 +24,7 @@ type StoreItem struct {
 	Identity string `json:"identity"`
 	CreationTime time.Time `json:"creationTime"`
 	LastModifiedTime time.Time `json:"lastModifiedTime"`
-	LastModifiedEventID string `json:"lastModifiedEventID"`
+	LatestEventID string `json:"latestEventID"`
 	FileLocation string `json:"fileLocation"`
 	Checksum string `json:"checksum"`
 }
@@ -33,15 +33,15 @@ type ConnectionItem struct {
 	Identity string `json:"identity"`
 	CreationTime time.Time `json:"creationTime"`
 	LastModifiedTime time.Time `json:"lastModifiedTime"`
-	LastModifiedEventID string `json:"lastModifiedEventID"`
+	LatestEventID string `json:"latestEventID"`
 	Strength float32 `json:"strength"`
 	Items []string `json:"items"`
 }
 
 type EventLogItem struct {
 	Identity string `json:"identity"`
-	Time int `json:"time"`
-	ModificationType string `json:"modificationType"`
+	Time time.Time `json:"time"`
+	ModificationType ModType `json:"modificationType"`
 	Change []Change `json:"change"`
 }
 
@@ -49,6 +49,15 @@ type Change struct {
 	Field string
 	Value string
 }
+
+type ModType int
+
+const (
+	INITIAL ModType = iota
+	REVERT
+	APPEND
+	REMOVE
+)
 
 type IdentityType int
 
@@ -73,7 +82,7 @@ func createIdentity(idType IdentityType) (string, error) {
 	}
 }
 
-func encodeStateToJson() []byte {
+func encodeStateSnippetToJson() []byte {
     bytes, err := json.MarshalIndent(state, "", "  ")
     if err != nil {
         fmt.Println(err.Error())
@@ -101,8 +110,21 @@ func writeStateToJson(bytes []byte) {
 	}
 }
 
-func printState () {
-	fmt.Println(string(encodeStateToJson()))
+func getState () string {
+	return string(encodeStateSnippetToJson())
+}
+
+func getStore () string {
+	return string(encodeStateSnippetToJson())
+}
+
+func searchStoreForItem(searchItem string) bool {
+	for _, v := range state.Store {
+		if v.Identity == searchItem {
+			return true
+		}
+	}
+	return false
 }
 
 func addStoreItem(fileLocation string) {
@@ -136,27 +158,18 @@ func addStoreItem(fileLocation string) {
 	}
 	creationTime := time.Now()
 	lastModifiedTime := creationTime
-	lastModifiedEventID := "ne-0"
+	latestEventID := "ne-0"
 	checksum := fmt.Sprintf("%x", hash.Sum(nil))
 
 	item := StoreItem{
 		Identity: identity,
 		CreationTime: creationTime,
 		LastModifiedTime: lastModifiedTime,
-		LastModifiedEventID: lastModifiedEventID,
+		LatestEventID: latestEventID,
 		FileLocation: fileLocation,
 		Checksum: checksum,
 	}
 	state.Store = append(state.Store, item)
-}
-
-func searchStoreForItem(searchItem string) bool {
-	for _, v := range state.Store {
-		if v.Identity == searchItem {
-			return true
-		}
-	}
-	return false
 }
 
 func addConnectionItem(item1 string, item2 string, input_strength float32) {
@@ -176,7 +189,7 @@ func addConnectionItem(item1 string, item2 string, input_strength float32) {
 	}
 	creationTime := time.Now()
 	lastModifiedTime := creationTime
-	lastModifiedEventID := "ne-0"
+	latestEventID := "ne-0"
 	strength := input_strength
 	items := []string{item1, item2}
 
@@ -184,11 +197,27 @@ func addConnectionItem(item1 string, item2 string, input_strength float32) {
 		Identity: identity,
 		CreationTime: creationTime,
 		LastModifiedTime: lastModifiedTime,
-		LastModifiedEventID: lastModifiedEventID,
+		LatestEventID: latestEventID,
 		Strength: strength,
 		Items: items,
 	}
 	state.Connections = append(state.Connections, item)
+}
+
+func logEvent(currentTime time.Time, modType ModType, changes []Change) {
+	identity, idErr := createIdentity(EVENT)
+	if idErr != nil {
+		fmt.Println("could not create id")
+		return
+	}
+
+	item := EventLogItem{
+		Identity: identity,
+		Time: currentTime,
+		ModificationType: modType,
+		Change: changes,
+	}
+	state.EventLog = append(state.EventLog, item)
 }
 
 func main() {
@@ -197,7 +226,7 @@ func main() {
 	// // addStoreItem("./test.txt")
 	// addConnectionItem("ns-bbmvdq1hb52ct4qc4bdg", "ns-bbmvap9hb52cuucmvolg", 0.5)
 	// printState()
-	// writeStateToJson(encodeStateToJson())
+	// writeStateToJson(encodeStateSnippetToJson())
 
 	id, err := createIdentity(CONNECTION)
 	if err != nil {
