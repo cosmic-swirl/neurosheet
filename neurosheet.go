@@ -129,7 +129,11 @@ func addStoreItem(fileLocation string) {
 		io.WriteString(hash, string(buf))
 	}
 
-	identity := "ns-"+xid.New().String()
+	identity, idErr := createIdentity(STORE)
+	if idErr != nil {
+		fmt.Println("could not create id")
+		return
+	}
 	creationTime := time.Now()
 	lastModifiedTime := creationTime
 	lastModifiedEventID := "ne-0"
@@ -165,7 +169,11 @@ func addConnectionItem(item1 string, item2 string, input_strength float32) {
 		return
 	}
 
-	identity := "nc-"+xid.New().String()
+	identity, idErr := createIdentity(CONNECTION)
+	if idErr != nil {
+		fmt.Println("could not create id")
+		return
+	}
 	creationTime := time.Now()
 	lastModifiedTime := creationTime
 	lastModifiedEventID := "ne-0"
