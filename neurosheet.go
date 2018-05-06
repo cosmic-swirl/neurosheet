@@ -10,6 +10,7 @@ import (
 	"crypto/sha256"
 	"math"
 	"io"
+	"errors"
 )
 
 
@@ -52,12 +53,25 @@ type Change struct {
 type IdentityType int
 
 const (
-	Store IdentityType = 0
-	Connection IdentityType = 1
-	Event IdentityType = 2
+	STORE IdentityType = iota
+	CONNECTION
+	EVENT
 )
 
 var state State
+
+func createIdentity(idType IdentityType) (string, error) {
+	switch (idType) {
+		case STORE:
+			return fmt.Sprintf("ns-%s", xid.New().String()), nil
+		case CONNECTION:
+			return fmt.Sprintf("nc-%s", xid.New().String()), nil
+		case EVENT:
+			return fmt.Sprintf("ne-%s", xid.New().String()), nil
+		default:
+			return "", errors.New("idType does not exist")
+	}
+}
 
 func encodeStateToJson() []byte {
     bytes, err := json.MarshalIndent(state, "", "  ")
@@ -171,10 +185,17 @@ func addConnectionItem(item1 string, item2 string, input_strength float32) {
 
 func main() {
 
-	loadCollectionFromJson()
-	// addStoreItem("./test.txt")
-	addConnectionItem("ns-bbmvdq1hb52ct4qc4bdg", "ns-bbmvap9hb52cuucmvolg", 0.5)
-	printState()
-	writeStateToJson(encodeStateToJson())
+	// loadCollectionFromJson()
+	// // addStoreItem("./test.txt")
+	// addConnectionItem("ns-bbmvdq1hb52ct4qc4bdg", "ns-bbmvap9hb52cuucmvolg", 0.5)
+	// printState()
+	// writeStateToJson(encodeStateToJson())
+
+	id, err := createIdentity(CONNECTION)
+	if err != nil {
+		fmt.Println("could not create id")
+		return
+	}
+	fmt.Println(id)
 
 }
