@@ -1,34 +1,47 @@
 {
   "store": [
     {
-      "identity": "ns-bbmvap9hb52cuucmvolg",
-      "creationTime": "2018-05-05T11:18:13.248728089-07:00",
-      "lastModifiedTime": "2018-05-05T11:18:13.248728089-07:00",
-      "lastModifiedEventID": "ne-0",
-      "fileLocation": "./test.txt",
-      "checksum": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
-    },
-    {
-      "identity": "ns-bbmvdq1hb52ct4qc4bdg",
-      "creationTime": "2018-05-05T11:24:40.344058487-07:00",
-      "lastModifiedTime": "2018-05-05T11:24:40.344058487-07:00",
-      "lastModifiedEventID": "ne-0",
+      "identity": "ns-bbnq3qphb52do9k6pll0",
+      "creationTime": "2018-05-06T17:46:35.557377837-07:00",
+      "lastModifiedTime": "2018-05-06T17:46:35.557377837-07:00",
+      "latestEventID": "ne-bbnq3qphb52do9k6pllg",
       "fileLocation": "./test.txt",
       "checksum": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     }
   ],
-  "connections": [
+  "connections": [],
+  "eventLog": [
     {
-      "identity": "nc-bbmvp7hhb52crqj9r8e0",
-      "creationTime": "2018-05-05T11:49:02.381253438-07:00",
-      "lastModifiedTime": "2018-05-05T11:49:02.381253438-07:00",
-      "lastModifiedEventID": "ne-0",
-      "strength": 0.5,
-      "items": [
-        "ns-bbmvdq1hb52ct4qc4bdg",
-        "ns-bbmvap9hb52cuucmvolg"
+      "identity": "ne-bbnq3qphb52do9k6pllg",
+      "previousEvent": "nn",
+      "time": "2018-05-06T17:46:35.557377837-07:00",
+      "modificationType": 0,
+      "changes": [
+        {
+          "Field": "Identity",
+          "Value": "ns-bbnq3qphb52do9k6pll0"
+        },
+        {
+          "Field": "CreationTime",
+          "Value": "2018-05-06 17:46:35.557377837 -0700 PDT m=+0.000441366"
+        },
+        {
+          "Field": "LastModifiedTime",
+          "Value": "2018-05-06 17:46:35.557377837 -0700 PDT m=+0.000441366"
+        },
+        {
+          "Field": "LatestEventID",
+          "Value": "ne-bbnq3qphb52do9k6pllg"
+        },
+        {
+          "Field": "FileLocation",
+          "Value": "./test.txt"
+        },
+        {
+          "Field": "Checksum",
+          "Value": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
       ]
     }
-  ],
-  "eventLog": []
+  ]
 }

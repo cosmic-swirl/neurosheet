@@ -40,9 +40,10 @@ type ConnectionItem struct {
 
 type EventLogItem struct {
 	Identity string `json:"identity"`
+	PreviousEvent string `json:previousEvent`
 	Time time.Time `json:"time"`
 	ModificationType ModType `json:"modificationType"`
-	Change []Change `json:"change"`
+	Changes []Change `json:"changes"`
 }
 
 type Change struct {
@@ -118,6 +119,10 @@ func getStore() string {
 	return string(encodeStateSnippetToJson(state.Store))
 }
 
+func getEventLog() string {
+	return string(encodeStateSnippetToJson(state.EventLog))
+}
+
 func getConnections() string {
 	return string(encodeStateSnippetToJson(state.Connections))
 }
@@ -131,7 +136,23 @@ func searchStoreForItem(searchItem string) bool {
 	return false
 }
 
+func logEvent(identity string, currentTime time.Time, modType ModType, previousState interface{}, changes []Change) string {
+	if previousState == nil && modType == INITIAL {
+		previousEvent := "nn"
+	}
+	item := EventLogItem{
+		Identity: identity,
+		Time: currentTime,
+		PreviousEvent: previousEvent,
+		ModificationType: modType,
+		Changes: changes,
+	}
+	state.EventLog = append(state.EventLog, item)
+	return identity
+}
+
 func addStoreItem(fileLocation string) {
+	creationTime := time.Now()
 	file, openErr := os.Open(fileLocation)
 	if openErr != nil {
 		fmt.Println("could not open file")
@@ -160,16 +181,30 @@ func addStoreItem(fileLocation string) {
 		fmt.Println("could not create id")
 		return
 	}
-	creationTime := time.Now()
 	lastModifiedTime := creationTime
-	latestEventID := "ne-0"
 	checksum := fmt.Sprintf("%x", hash.Sum(nil))
+
+	eventId, eventIdErr := createIdentity(EVENT)
+	if eventIdErr != nil {
+		fmt.Println("error when creating event identity")
+		return
+	}
+
+	changes := []Change{
+		Change{Field: "Identity", Value: identity},
+		Change{Field: "CreationTime", Value: creationTime.String()},
+		Change{Field: "LastModifiedTime", Value: creationTime.String()},
+		Change{Field: "LatestEventID", Value: eventId},
+		Change{Field: "FileLocation", Value: fileLocation},
+		Change{Field: "Checksum", Value: checksum},
+	}
+	logEvent(eventId, creationTime, INITIAL, changes)
 
 	item := StoreItem{
 		Identity: identity,
 		CreationTime: creationTime,
 		LastModifiedTime: lastModifiedTime,
-		LatestEventID: latestEventID,
+		LatestEventID: eventId,
 		FileLocation: fileLocation,
 		Checksum: checksum,
 	}
@@ -208,29 +243,13 @@ func addConnectionItem(item1 string, item2 string, input_strength float32) {
 	state.Connections = append(state.Connections, item)
 }
 
-func logEvent(currentTime time.Time, modType ModType, changes []Change) {
-	identity, idErr := createIdentity(EVENT)
-	if idErr != nil {
-		fmt.Println("could not create id")
-		return
-	}
-
-	item := EventLogItem{
-		Identity: identity,
-		Time: currentTime,
-		ModificationType: modType,
-		Change: changes,
-	}
-	state.EventLog = append(state.EventLog, item)
-}
-
 func main() {
 
 	loadCollectionFromJson()
-	// // addStoreItem("./test.txt")
+	addStoreItem("./test.txt")
 	// addConnectionItem("ns-bbmvdq1hb52ct4qc4bdg", "ns-bbmvap9hb52cuucmvolg", 0.5)
 	// printState()
-	// writeStateToJson(encodeStateSnippetToJson())
+	writeStateToJson(encodeStateSnippetToJson(state))
 
 	// id, err := createIdentity(CONNECTION)
 	// if err != nil {
@@ -239,7 +258,7 @@ func main() {
 	// }
 	// fmt.Println(id)
 
-	fmt.Println(getStore())
+	fmt.Println(getEventLog())
 	// fmt.Println(getState())
 
 }
