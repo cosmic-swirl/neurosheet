@@ -82,8 +82,8 @@ func createIdentity(idType IdentityType) (string, error) {
 	}
 }
 
-func encodeStateSnippetToJson() []byte {
-    bytes, err := json.MarshalIndent(state, "", "  ")
+func encodeStateSnippetToJson(input_state interface{}) []byte {
+    bytes, err := json.MarshalIndent(input_state, "", "  ")
     if err != nil {
         fmt.Println(err.Error())
         os.Exit(1)
@@ -111,11 +111,11 @@ func writeStateToJson(bytes []byte) {
 }
 
 func getState () string {
-	return string(encodeStateSnippetToJson())
+	return string(encodeStateSnippetToJson(state))
 }
 
 func getStore () string {
-	return string(encodeStateSnippetToJson())
+	return string(encodeStateSnippetToJson(state.Store))
 }
 
 func searchStoreForItem(searchItem string) bool {
@@ -222,17 +222,20 @@ func logEvent(currentTime time.Time, modType ModType, changes []Change) {
 
 func main() {
 
-	// loadCollectionFromJson()
+	loadCollectionFromJson()
 	// // addStoreItem("./test.txt")
 	// addConnectionItem("ns-bbmvdq1hb52ct4qc4bdg", "ns-bbmvap9hb52cuucmvolg", 0.5)
 	// printState()
 	// writeStateToJson(encodeStateSnippetToJson())
 
-	id, err := createIdentity(CONNECTION)
-	if err != nil {
-		fmt.Println("could not create id")
-		return
-	}
-	fmt.Println(id)
+	// id, err := createIdentity(CONNECTION)
+	// if err != nil {
+	// 	fmt.Println("could not create id")
+	// 	return
+	// }
+	// fmt.Println(id)
+
+	fmt.Println(getStore())
+	// fmt.Println(getState())
 
 }
