@@ -11,6 +11,7 @@ import (
 	"math"
 	"io"
 	"errors"
+	"strconv"
 )
 
 
@@ -69,6 +70,11 @@ const (
 )
 
 var state State
+
+func floatToString(input_num float64) string {
+    // to convert a float number to a string
+    return strconv.FormatFloat(input_num, 'f', 6, 64)
+}
 
 func createIdentity(idType IdentityType) (string, error) {
 	switch (idType) {
@@ -136,10 +142,8 @@ func searchStoreForItem(searchItem string) bool {
 	return false
 }
 
-func logEvent(identity string, currentTime time.Time, modType ModType, previousState interface{}, changes []Change) string {
-	if previousState == nil && modType == INITIAL {
-		previousEvent := "nn"
-	}
+func logEvent(identity string, currentTime time.Time, modType ModType, previousEvent string, changes []Change) string {
+
 	item := EventLogItem{
 		Identity: identity,
 		Time: currentTime,
@@ -194,11 +198,10 @@ func addStoreItem(fileLocation string) {
 		Change{Field: "Identity", Value: identity},
 		Change{Field: "CreationTime", Value: creationTime.String()},
 		Change{Field: "LastModifiedTime", Value: creationTime.String()},
-		Change{Field: "LatestEventID", Value: eventId},
 		Change{Field: "FileLocation", Value: fileLocation},
 		Change{Field: "Checksum", Value: checksum},
 	}
-	logEvent(eventId, creationTime, INITIAL, changes)
+	logEvent(eventId, creationTime, INITIAL, "nn", changes)
 
 	item := StoreItem{
 		Identity: identity,
@@ -212,6 +215,7 @@ func addStoreItem(fileLocation string) {
 }
 
 func addConnectionItem(item1 string, item2 string, input_strength float32) {
+	creationTime := time.Now()
 	if !(1 > input_strength && input_strength > 0) {
 		return
 	}
@@ -226,17 +230,29 @@ func addConnectionItem(item1 string, item2 string, input_strength float32) {
 		fmt.Println("could not create id")
 		return
 	}
-	creationTime := time.Now()
+	eventId, eventIdErr := createIdentity(EVENT)
+	if eventIdErr != nil {
+		fmt.Println("could not create event id")
+		return
+	}
 	lastModifiedTime := creationTime
-	latestEventID := "ne-0"
 	strength := input_strength
 	items := []string{item1, item2}
+
+	changes := []Change{
+		Change{Field: "Identity", Value: identity},
+		Change{Field: "CreationTime", Value: creationTime.String()},
+		Change{Field: "LastModifiedTime", Value: creationTime.String()},
+		Change{Field: "Strength", Value: floatToString( float64(strength) )},
+		Change{Field: "Items", Value: string( encodeStateSnippetToJson(items) )},
+	}
+	logEvent(eventId, creationTime, INITIAL, "nn", changes)
 
 	item := ConnectionItem{
 		Identity: identity,
 		CreationTime: creationTime,
 		LastModifiedTime: lastModifiedTime,
-		LatestEventID: latestEventID,
+		LatestEventID: eventId,
 		Strength: strength,
 		Items: items,
 	}
