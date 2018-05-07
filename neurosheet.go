@@ -110,12 +110,16 @@ func writeStateToJson(bytes []byte) {
 	}
 }
 
-func getState () string {
+func getState() string {
 	return string(encodeStateSnippetToJson(state))
 }
 
-func getStore () string {
+func getStore() string {
 	return string(encodeStateSnippetToJson(state.Store))
+}
+
+func getConnections() string {
+	return string(encodeStateSnippetToJson(state.Connections))
 }
 
 func searchStoreForItem(searchItem string) bool {
