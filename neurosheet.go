@@ -59,6 +59,7 @@ const (
 	REVERT
 	APPEND
 	REMOVE
+	DELETE
 )
 
 type IdentityType int
@@ -125,21 +126,30 @@ func getStore() string {
 	return string(encodeStateSnippetToJson(state.Store))
 }
 
-func getEventLog() string {
-	return string(encodeStateSnippetToJson(state.EventLog))
-}
-
 func getConnections() string {
 	return string(encodeStateSnippetToJson(state.Connections))
 }
 
-func searchStoreForItem(searchItem string) bool {
-	for _, v := range state.Store {
+func getEventLog() string {
+	return string(encodeStateSnippetToJson(state.EventLog))
+}
+
+func searchStoreForItem(searchItem string) (bool, int, StoreItem) {
+	for i, v := range state.Store {
 		if v.Identity == searchItem {
-			return true
+			return true, i, v
 		}
 	}
-	return false
+	return false, -1, StoreItem{}
+}
+
+func searchConnectionsForItem(searchItem string) (bool, int, ConnectionItem) {
+	for i, v := range state.Connections {
+		if v.Identity == searchItem {
+			return true, i, v
+		}
+	}
+	return false, -1, ConnectionItem{}
 }
 
 func logEvent(identity string, currentTime time.Time, modType ModType, previousEvent string, changes []Change) string {
@@ -220,7 +230,10 @@ func addConnectionItem(item1 string, item2 string, input_strength float32) {
 		return
 	}
 
-	if !( searchStoreForItem(item1) && searchStoreForItem(item2) ) {
+	search1, _, _ := searchStoreForItem(item1)
+	search2, _, _ := searchStoreForItem(item2)
+
+	if !( search1 && search2 ) {
 		fmt.Println("could not find both items in store for connection")
 		return
 	}
@@ -259,6 +272,39 @@ func addConnectionItem(item1 string, item2 string, input_strength float32) {
 	state.Connections = append(state.Connections, item)
 }
 
+func deleteStoreItem(identity string) {
+	currentTime := time.Now()
+	_, index, v := searchStoreForItem(identity)
+	if !(index > 0) {
+		return
+	}
+	eventId, idErr := createIdentity(EVENT)
+	if idErr != nil {
+		return
+	}
+	changes := []Change{}
+	logEvent(eventId, currentTime, DELETE, v.LatestEventID, changes)
+	state.Store = append(state.Store[:index], state.Store[index+1:]...)
+	return
+}
+
+func deleteConnection(identity string) {
+	currentTime := time.Now()
+	changes := []Change{}
+	eventId, idErr := createIdentity(EVENT)
+	if idErr != nil {
+		return
+	}
+
+	_, index, item := searchConnectionsForItem(identity)
+	if !(index > 0) {
+		return
+	}
+	logEvent(eventId, currentTime, DELETE, item.LatestEventID, changes)
+	state.Connections = append(state.Connections[:index], state.Connections[index+1:]...)
+	return
+}
+
 func main() {
 
 	loadCollectionFromJson()
@@ -275,6 +321,6 @@ func main() {
 	// fmt.Println(id)
 
 	fmt.Println(getEventLog())
-	// fmt.Println(getState())
+	// fmt.Println(getState()) 
 
 }

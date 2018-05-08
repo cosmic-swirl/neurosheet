@@ -15,6 +15,14 @@
       "latestEventID": "ne-bbnqpp9hb52e39nl40sg",
       "fileLocation": "./test.txt",
       "checksum": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "identity": "ns-bbog71phb52cn45826lg",
+      "creationTime": "2018-05-07T18:55:19.518889558-07:00",
+      "lastModifiedTime": "2018-05-07T18:55:19.518889558-07:00",
+      "latestEventID": "ne-bbog71phb52cn45826m0",
+      "fileLocation": "./test.txt",
+      "checksum": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     }
   ],
   "connections": [],
@@ -68,6 +76,34 @@
         {
           "Field": "LastModifiedTime",
           "Value": "2018-05-06 18:33:25.652055336 -0700 PDT m=+0.000672267"
+        },
+        {
+          "Field": "FileLocation",
+          "Value": "./test.txt"
+        },
+        {
+          "Field": "Checksum",
+          "Value": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      ]
+    },
+    {
+      "identity": "ne-bbog71phb52cn45826m0",
+      "PreviousEvent": "nn",
+      "time": "2018-05-07T18:55:19.518889558-07:00",
+      "modificationType": 0,
+      "changes": [
+        {
+          "Field": "Identity",
+          "Value": "ns-bbog71phb52cn45826lg"
+        },
+        {
+          "Field": "CreationTime",
+          "Value": "2018-05-07 18:55:19.518889558 -0700 PDT m=+0.000640421"
+        },
+        {
+          "Field": "LastModifiedTime",
+          "Value": "2018-05-07 18:55:19.518889558 -0700 PDT m=+0.000640421"
         },
         {
           "Field": "FileLocation",
